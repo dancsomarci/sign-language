@@ -1,0 +1,10 @@
+Bear
+Tiger
+Zebra
+Hyena
+Kangaroo
+Monkey
+Lion 
+Alligator 
+Horse
+Whale
