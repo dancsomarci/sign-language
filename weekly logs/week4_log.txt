@@ -1,0 +1,28 @@
+Fingerspelling:
+---------------
+
+-Statistics both for phrase length and seq lengths (explaining the filter heuristic)
+-Masking implemented with transformers
+-kaggle training
+-Experimenting with different model sizes/sequence lengths (~80% masked accuracy from correct input context)
+-Saving during training figured out
+-Different ways to use models + testing (not even finished)
+-Gpt experimentation
+-tested with camera (Im not good, but videos work)
+
+-Next steps:
+	-One last ux improvement idea
+	-RNN, LSTM encoder decoder kipróbál (ez már egyszerűbb lesz mert kész a pipeline)
+	-statikus adathalmaz kaggle feldolgoz
+
+Sign detection:
+---------------
+
+-Sadly no improvement:(
+
+Kérdések:
+-diplomaportál teendők
+-miről érdemes írni? (neuron magyarázása? milyen részletesen?)
+-valami menő ötlet?
+
+
