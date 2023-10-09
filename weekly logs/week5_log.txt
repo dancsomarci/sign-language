@@ -1,0 +1,6 @@
+Week 5 progress
+- Lstm based encoder/decoder model for fingerspelling
+- Recording static dataset for fingerspelling
+- Sign recognition refactor with no luck
+- Sign recognition experimenting with other models success (74%)
+- Many experiments with kaggle GPU training
