@@ -1,6 +1,33 @@
-Week 5 progress
-- Lstm based encoder/decoder model for fingerspelling
-- Recording static dataset for fingerspelling
-- Sign recognition refactor with no luck
-- Sign recognition experimenting with other models success (74%)
-- Many experiments with kaggle GPU training
+Fingerspelling:
+---------------
+-New Lstm model to compare with
+-Experiments with new ideas from Hoyeul Sohn
+-different ways to enhance model in application
+
+-static mode:
+	-collected dataset of myself
+	-J, Z rely on movement I have indea to classify between them (hybrid model)
+
+
+Sign classification:
+--------------------
+-Finally found new model (still figuring out why it works)
+	-New preprocessing
+	-skip connections seem to be the key
+	-Masking away the padding in Conv1D
+	-best so far 74% (~80% was the best in the competition)
+
+
+Questions:
+----------
+-Do I need an integrated solution or just the research of the 2 branches?
+-Should I write about neurons and stuff and the math behind them or stay more high level?
+-No static mode for sign detection is that good enough?
+
+-Dipterv portal subject? what is that?
+-Other deadlines?
+
+Plan:
+-----
+-Coding and models ready this week
+-2 weeks to write the thesis
