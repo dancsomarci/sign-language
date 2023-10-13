@@ -1,0 +1,55 @@
+-sign language basics (fs, signing)
+-why asl
+
+-Glove, traditional image processing
+
+-pose estimation, advantages
+-compare 2 methods and declare mediapipe winner or just use mediapipe because of dataset
+
+Goals:
+	-real-times needs, latency and complexity restrains (5G signaling for help in car crash calculation.)
+	-is pose estimation good enough for the task?
+
+Mention:
+	-tech stack: parquet, tfdataset/records
+
+(Don't forget data description, statistics, preprocessing, metrics, compare learning curves, go through parameters in notebooks etc...)
+
+-asl fs challenges (j, z etc..., fun facts etc...)
+-fingerspelling static
+	-other datasets can't be used with mediapipe
+	-collected my own #TODO collect more
+	-compare models, augment data #TODO
+	-extend with simple things like kálmán filter
+	-??llm correction for dynamic/double signs
+	-??track motion if certain fingers and build a model for dynamic signs
+-signing detection model
+	-prove that is more than simple heuristic
+-fingerspelling from seq
+	-translation task, encoder, decoder approach
+	-RNN #TODO (+can be stacked as well)
+	-GRU
+	-LSTM
+	-Transformer (Math from tf notebook and original paper)
+	-Transformer with positional encoding
+		- for landmarks processing try both with and without (mention semantically incorrect)
+	-Transformer with ECA for LandmarkEmbedding
+		- with and without skip connections
+	-extening models with 5-6 other techniques (look for explanation and flow in the notebooks) #TODO detection and pred in same model, and also rollout from buffer
+-signs classification from seq (explain why)
+	-models #TODO
+	-extending model with clever algorithms
+	??can we extend without retraining #TODO
+
+??combine two branches
+	-classification between the two forms
+	-propose a huge transformer that can handle a ton of tokens like google translate. (dataset needed)
+
+-Results and conclusion (This is the most important part!)
+	-models
+	-methods (whats the future, what data has to be collected)
+	-is pose approximation in its current form enough?
+		-when do problems arise (youtube video)
+		-maybe hybrid between glove based using a ring on the thumb
+		-I believe in this method
+	
