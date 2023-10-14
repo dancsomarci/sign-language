@@ -10,5 +10,5 @@
 -sign classification why works sometimes? (lower batchnorm and dropout for faster learning perhaps?, less training data)
 
 ?theoretical problems:
-	-extend without retraining
+	-extend without retraining (train to produce exact latent vector and when)
 	-combine branches
