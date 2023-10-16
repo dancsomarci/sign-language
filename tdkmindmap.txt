@@ -1,13 +1,14 @@
 -sign language basics (fs, signing)
 -why asl
 
--Glove, traditional image processing
+-Glove, traditional image processing # collect papers
 
 -pose estimation, advantages
 -compare 2 methods and declare mediapipe winner or just use mediapipe because of dataset
+-holistic vs hands
 
 Goals:
-	-real-times needs, latency and complexity restrains (5G signaling for help in car crash calculation.)
+	-real-time needs, latency and complexity restrains (5G signaling for help in car crash calculation.)
 	-is pose estimation good enough for the task?
 
 Mention:
@@ -17,39 +18,53 @@ Mention:
 
 -asl fs challenges (j, z etc..., fun facts etc...)
 -fingerspelling static
-	-other datasets can't be used with mediapipe
+	-other datasets can't be used with mediapipe (fs-mnist, university of sg, arabic, )
+		-show tests (maybe add arabic as well)
+		-superresolution/upscaling
 	-collected my own #TODO collect more
-	-compare models, augment data #TODO
-	-extend with simple things like kálmán filter
-	-??llm correction for dynamic/double signs
-	-??track motion if certain fingers and build a model for dynamic signs
+	-compare models, augment data
+	-simple, buffered model
+	-continuous model with signing detection
+
+	-llm correction for dynamic/double signs
+	-track motion if certain fingers and build a model for dynamic signs #TODO
+
 -signing detection model
+	-add augmentation (#MAYBE)
 	-prove that is more than simple heuristic
+
 -fingerspelling from seq
 	-translation task, encoder, decoder approach
-	-RNN #TODO (+can be stacked as well)
-	-GRU
-	-LSTM
+	-with positional encoding
+	-RNN, GRU, LSTM combined model (stacked) https://chat.openai.com/share/54dec279-0ebc-4af3-bc5f-8aac6851d27a
 	-Transformer (Math from tf notebook and original paper)
-	-Transformer with positional encoding
-		- for landmarks processing try both with and without (mention semantically incorrect)
-	-Transformer with ECA for LandmarkEmbedding
-		- with and without skip connections
-	-extening models with 5-6 other techniques (look for explanation and flow in the notebooks) #TODO detection and pred in same model, and also rollout from buffer
+	-Transformer with ECA for LandmarkEmbedding (skip connections??s)
+	-extending models with 5-6 other techniques
+		-signing detection works from same input as model vs different input # TODO
+		-rollout from buffer # TODO
+		-continuous (w signing detection)
+		-translate in one go (w signing detection)
+		-translate in one go when signing detection stops
+		-mention buffered signing detection
+		
 -signs classification from seq (explain why)
 	-models #TODO
 	-extending model with clever algorithms
-	??can we extend without retraining #TODO
+	-can we extend without retraining #TODO
+		-test with taking off last layer and closest match after
+		-for new signs test whether output mean falls closest to "unseen-new-sign"
 
-??combine two branches
-	-classification between the two forms
+-combine two branches
+	-classification between the two forms (mention problems, not this way)
 	-propose a huge transformer that can handle a ton of tokens like google translate. (dataset needed)
+		-test teaching for single signs #TODO
 
 -Results and conclusion (This is the most important part!)
 	-models
 	-methods (whats the future, what data has to be collected)
+	-fingerspelling emotions, different intonations etc...
 	-is pose approximation in its current form enough?
 		-when do problems arise (youtube video)
-		-maybe hybrid between glove based using a ring on the thumb
+		-maybe hybrid between glove based using a ring on the thumb (until things become better)
 		-I believe in this method
 	
