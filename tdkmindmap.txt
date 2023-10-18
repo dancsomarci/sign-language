@@ -1,7 +1,7 @@
 -sign language basics (fs, signing)
 -why asl
 
--Glove, traditional image processing # collect papers
+-Glove, traditional image processing
 
 -pose estimation, advantages
 -compare 2 methods and declare mediapipe winner or just use mediapipe because of dataset
@@ -16,7 +16,6 @@ Mention:
 
 (Don't forget data description, statistics, preprocessing, metrics, compare learning curves, go through parameters in notebooks etc...)
 
--asl fs challenges (j, z etc..., fun facts etc...)
 -fingerspelling static
 	-other datasets can't be used with mediapipe (fs-mnist, university of sg, arabic, )
 		-show tests (maybe add arabic as well)
@@ -28,6 +27,8 @@ Mention:
 
 	-llm correction for dynamic/double signs
 	-track motion if certain fingers and build a model for dynamic signs #TODO
+
+-asl fs challenges (j, z etc..., fun facts etc...)
 
 -signing detection model
 	-add augmentation (#MAYBE)
