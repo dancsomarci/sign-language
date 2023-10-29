@@ -1,0 +1,349 @@
+with positionallmembedding
+
+class BaseAttention(tf.keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super().__init__()
+        self.mha = tf.keras.layers.MultiHeadAttention(**kwargs)
+        self.layernorm = tf.keras.layers.LayerNormalization()
+        self.add = tf.keras.layers.Add()
+
+class CrossAttention(BaseAttention):
+    def call(self, x, context):
+        attn_output, attn_scores = self.mha(
+            query=x,
+            key=context,
+            value=context,
+            return_attention_scores=True)
+       
+        # Cache the attention scores for plotting later.
+        self.last_attn_scores = attn_scores
+    
+        x = self.add([x, attn_output])
+        x = self.layernorm(x)
+    
+        return x
+    
+class GlobalSelfAttention(BaseAttention):
+    def call(self, x):
+        attn_output = self.mha(
+            query=x,
+            value=x,
+            key=x)
+        x = self.add([x, attn_output])
+        x = self.layernorm(x)
+        return x
+    
+class CausalSelfAttention(BaseAttention):
+    def call(self, x):
+        attn_output = self.mha(
+            query=x,
+            value=x,
+            key=x,
+            use_causal_mask = True)
+        x = self.add([x, attn_output])
+        x = self.layernorm(x)
+        return x
+    
+class FeedForward(tf.keras.layers.Layer):
+    def __init__(self, d_model, dff, dropout_rate=0.1):
+        super().__init__()
+        self.seq = tf.keras.Sequential([
+          tf.keras.layers.Dense(dff, activation='relu'),
+          tf.keras.layers.Dense(d_model),
+          tf.keras.layers.Dropout(dropout_rate)
+        ])
+        self.add = tf.keras.layers.Add()
+        self.layer_norm = tf.keras.layers.LayerNormalization()
+
+    def call(self, x):
+        x = self.add([x, self.seq(x)])
+        x = self.layer_norm(x) 
+        return x
+    
+class EncoderLayer(tf.keras.layers.Layer):
+    def __init__(self,*, d_model, num_heads, dff, dropout_rate=0.1):
+        super().__init__()
+    
+        self.self_attention = GlobalSelfAttention(
+            num_heads=num_heads,
+            key_dim=d_model,
+            dropout=dropout_rate)
+    
+        self.ffn = FeedForward(d_model, dff)
+    
+    def call(self, x):
+        x = self.self_attention(x)
+        x = self.ffn(x)
+        return x
+    
+class Encoder(tf.keras.layers.Layer):
+    def __init__(self, *, len_of_seq, num_layers, d_model, num_heads,
+               dff, num_conv_layers, filter_size, dropout_rate=0.1):
+        super().__init__()
+    
+        self.d_model = d_model
+        self.num_layers = num_layers
+    
+        self.pos_embedding = PositionalLandmarkEmbedding(
+            len_of_seq, d_model, num_conv_layers, filter_size)
+    
+        self.enc_layers = [
+            EncoderLayer(d_model=d_model,
+                         num_heads=num_heads,
+                         dff=dff,
+                         dropout_rate=dropout_rate)
+            for _ in range(num_layers)]
+        self.dropout = tf.keras.layers.Dropout(dropout_rate)
+
+    def call(self, x):
+        # `x` is landmark sequences with shape: (batch, seq_len, features)
+        x = self.pos_embedding(x)  # Shape `(batch_size, seq_len, d_model)`.
+        
+        x = self.dropout(x)
+    
+        for i in range(self.num_layers):
+            x = self.enc_layers[i](x)
+    
+        return x  # Shape `(batch_size, seq_len, d_model)`.
+    
+class DecoderLayer(tf.keras.layers.Layer):
+    def __init__(self, *, d_model, num_heads, dff, dropout_rate=0.1):
+        super(DecoderLayer, self).__init__()
+    
+        self.causal_self_attention = CausalSelfAttention(
+            num_heads=num_heads,
+            key_dim=d_model,
+            dropout=dropout_rate)
+        
+        self.cross_attention = CrossAttention(
+            num_heads=num_heads,
+            key_dim=d_model,
+            dropout=dropout_rate)
+    
+        self.ffn = FeedForward(d_model, dff)
+
+    def call(self, x, context):
+        x = self.causal_self_attention(x=x)
+        x = self.cross_attention(x=x, context=context)
+    
+        # Cache the last attention scores for plotting later
+        self.last_attn_scores = self.cross_attention.last_attn_scores
+    
+        x = self.ffn(x)  # Shape `(batch_size, seq_len, d_model)`.
+        return x
+    
+class Decoder(tf.keras.layers.Layer):
+    def __init__(self, *, num_layers, d_model, num_heads, dff, vocab_size, max_future_input_size, dropout_rate=0.1):
+        super(Decoder, self).__init__()
+    
+        self.d_model = d_model
+        self.num_layers = num_layers
+    
+        self.pos_embedding = PositionalTokenEmbedding(vocab_size=vocab_size, d_model=d_model, max_future_input_size=max_future_input_size)
+        self.dropout = tf.keras.layers.Dropout(dropout_rate)
+        self.dec_layers = [
+            DecoderLayer(d_model=d_model, num_heads=num_heads, dff=dff, dropout_rate=dropout_rate)
+            for _ in range(num_layers)]
+    
+        self.last_attn_scores = None
+
+    def call(self, x, context):
+        # `x` is token-IDs shape (batch, target_seq_len)
+        x = self.pos_embedding(x)  # (batch_size, target_seq_len, d_model)
+    
+        x = self.dropout(x)
+    
+        for i in range(self.num_layers):
+            x  = self.dec_layers[i](x, context)
+    
+        self.last_attn_scores = self.dec_layers[-1].last_attn_scores
+    
+        # The shape of x is (batch_size, target_seq_len, d_model).
+        return x
+    
+class GeneralTransformer(tf.keras.Model):
+    def __init__(self, *, len_lm_seq, num_enc_layers, num_conv_layers, filter_size, num_dec_layers, d_model, num_heads, dff, input_vocab_size, target_vocab_size, max_future_input_size, dropout_rate=0.1):
+        super().__init__()
+        self.max_future_input_size = max_future_input_size
+        
+        self.encoder = Encoder(len_of_seq=len_lm_seq,
+                               num_layers=num_enc_layers, d_model=d_model,
+                               num_heads=num_heads, dff=dff,
+                               num_conv_layers=num_conv_layers,
+                               filter_size=filter_size,
+                               dropout_rate=dropout_rate)
+        
+        self.decoder = Decoder(num_layers=num_dec_layers, d_model=d_model,
+                               num_heads=num_heads, dff=dff,
+                               vocab_size=target_vocab_size,
+                               max_future_input_size=max_future_input_size,
+                               dropout_rate=dropout_rate)
+    
+        self.final_layer = tf.keras.layers.Dense(target_vocab_size)
+
+    def call(self, inputs):
+        # To use a Keras model with `.fit` you must pass all your inputs in the
+        # first argument.
+        landmark_seq, prev_gen_context  = inputs
+    
+        encoded_lm_seq = self.encoder(landmark_seq)  # (batch_size, landmark_seq_len, d_model)
+        x = self.decoder(prev_gen_context, encoded_lm_seq)  # (batch_size, target_len, d_model)
+        logits = self.final_layer(x)  # (batch_size, target_len, target_vocab_size)
+
+        try:
+            # Drop the keras mask, so it doesn't scale the losses/metrics.
+            # b/250038731
+            del logits._keras_mask
+        except AttributeError:
+            pass
+    
+        return logits
+
+# This function is important in case the model needs to be loaded only from the saved weights.
+# The exact model needs to be recreated, with all parameters matching!
+def get_model(d_model):
+    max_future_input_size = MAX_PHRASE_LEN  # In the future the input can be longer than what it's trained on
+    
+    general_transformer = GeneralTransformer(
+        len_lm_seq=FRAME_LEN,
+        num_enc_layers=2,
+        num_conv_layers=3,
+        filter_size=11,
+        num_dec_layers=4,
+        d_model=d_model,
+        num_heads=2,
+        dff=256, 
+        input_vocab_size=len(char_to_num),
+        target_vocab_size=len(char_to_num),
+        max_future_input_size=max_future_input_size,
+        dropout_rate=0.1)
+
+    return general_transformer
+
+D_MODEL = 256 # embedding size
+
+model = get_model(D_MODEL)
+
+Epoch 1/30
+
+Epoch 1: val_loss improved from inf to 1.37685, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 207s - loss: 2.2831 - masked_accuracy: 0.3536 - val_loss: 1.3768 - val_masked_accuracy: 0.6054 - 207s/epoch - 130ms/step
+Epoch 2/30
+
+Epoch 2: val_loss improved from 1.37685 to 0.98353, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 175s - loss: 1.1886 - masked_accuracy: 0.6620 - val_loss: 0.9835 - val_masked_accuracy: 0.7206 - 175s/epoch - 110ms/step
+Epoch 3/30
+
+Epoch 3: val_loss did not improve from 0.98353
+1591/1591 - 175s - loss: 1.2055 - masked_accuracy: 0.6566 - val_loss: 1.4013 - val_masked_accuracy: 0.5936 - 175s/epoch - 110ms/step
+Epoch 4/30
+
+Epoch 4: val_loss did not improve from 0.98353
+1591/1591 - 174s - loss: 1.4982 - masked_accuracy: 0.5620 - val_loss: 1.1836 - val_masked_accuracy: 0.6539 - 174s/epoch - 110ms/step
+Epoch 5/30
+
+Epoch 5: val_loss improved from 0.98353 to 0.92781, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 175s - loss: 1.1386 - masked_accuracy: 0.6678 - val_loss: 0.9278 - val_masked_accuracy: 0.7282 - 175s/epoch - 110ms/step
+Epoch 6/30
+
+Epoch 6: val_loss improved from 0.92781 to 0.84068, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 175s - loss: 0.9992 - masked_accuracy: 0.7076 - val_loss: 0.8407 - val_masked_accuracy: 0.7541 - 175s/epoch - 110ms/step
+Epoch 7/30
+
+Epoch 7: val_loss improved from 0.84068 to 0.76108, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 175s - loss: 0.8864 - masked_accuracy: 0.7408 - val_loss: 0.7611 - val_masked_accuracy: 0.7757 - 175s/epoch - 110ms/step
+Epoch 8/30
+
+Epoch 8: val_loss did not improve from 0.76108
+1591/1591 - 174s - loss: 0.8396 - masked_accuracy: 0.7543 - val_loss: 0.7707 - val_masked_accuracy: 0.7736 - 174s/epoch - 110ms/step
+Epoch 9/30
+
+Epoch 9: val_loss improved from 0.76108 to 0.68415, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 175s - loss: 0.8098 - masked_accuracy: 0.7623 - val_loss: 0.6841 - val_masked_accuracy: 0.7982 - 175s/epoch - 110ms/step
+Epoch 10/30
+
+Epoch 10: val_loss improved from 0.68415 to 0.66237, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 175s - loss: 0.7733 - masked_accuracy: 0.7724 - val_loss: 0.6624 - val_masked_accuracy: 0.8037 - 175s/epoch - 110ms/step
+Epoch 11/30
+
+Epoch 11: val_loss improved from 0.66237 to 0.62169, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 174s - loss: 0.7296 - masked_accuracy: 0.7850 - val_loss: 0.6217 - val_masked_accuracy: 0.8161 - 174s/epoch - 110ms/step
+Epoch 12/30
+
+Epoch 12: val_loss improved from 0.62169 to 0.58186, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 174s - loss: 0.6795 - masked_accuracy: 0.7998 - val_loss: 0.5819 - val_masked_accuracy: 0.8278 - 174s/epoch - 110ms/step
+Epoch 13/30
+
+Epoch 13: val_loss did not improve from 0.58186
+1591/1591 - 174s - loss: 0.6704 - masked_accuracy: 0.8016 - val_loss: 0.5896 - val_masked_accuracy: 0.8244 - 174s/epoch - 110ms/step
+Epoch 14/30
+
+Epoch 14: val_loss improved from 0.58186 to 0.54684, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 175s - loss: 0.6465 - masked_accuracy: 0.8083 - val_loss: 0.5468 - val_masked_accuracy: 0.8372 - 175s/epoch - 110ms/step
+Epoch 15/30
+
+Epoch 15: val_loss did not improve from 0.54684
+1591/1591 - 174s - loss: 0.6194 - masked_accuracy: 0.8165 - val_loss: 0.5504 - val_masked_accuracy: 0.8359 - 174s/epoch - 109ms/step
+Epoch 16/30
+
+Epoch 16: val_loss improved from 0.54684 to 0.51526, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 175s - loss: 0.6082 - masked_accuracy: 0.8188 - val_loss: 0.5153 - val_masked_accuracy: 0.8462 - 175s/epoch - 110ms/step
+Epoch 17/30
+
+Epoch 17: val_loss did not improve from 0.51526
+1591/1591 - 174s - loss: 0.5975 - masked_accuracy: 0.8220 - val_loss: 0.5249 - val_masked_accuracy: 0.8430 - 174s/epoch - 110ms/step
+Epoch 18/30
+
+Epoch 18: val_loss improved from 0.51526 to 0.48850, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 174s - loss: 0.5880 - masked_accuracy: 0.8249 - val_loss: 0.4885 - val_masked_accuracy: 0.8541 - 174s/epoch - 110ms/step
+Epoch 19/30
+
+Epoch 19: val_loss did not improve from 0.48850
+1591/1591 - 174s - loss: 0.5628 - masked_accuracy: 0.8322 - val_loss: 0.4918 - val_masked_accuracy: 0.8528 - 174s/epoch - 110ms/step
+Epoch 20/30
+
+Epoch 20: val_loss improved from 0.48850 to 0.46120, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 175s - loss: 0.5472 - masked_accuracy: 0.8365 - val_loss: 0.4612 - val_masked_accuracy: 0.8617 - 175s/epoch - 110ms/step
+Epoch 21/30
+
+Epoch 21: val_loss improved from 0.46120 to 0.44549, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 174s - loss: 0.5288 - masked_accuracy: 0.8421 - val_loss: 0.4455 - val_masked_accuracy: 0.8661 - 174s/epoch - 110ms/step
+Epoch 22/30
+
+Epoch 22: val_loss improved from 0.44549 to 0.42898, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 174s - loss: 0.5168 - masked_accuracy: 0.8451 - val_loss: 0.4290 - val_masked_accuracy: 0.8711 - 174s/epoch - 109ms/step
+Epoch 23/30
+
+Epoch 23: val_loss did not improve from 0.42898
+1591/1591 - 172s - loss: 0.5110 - masked_accuracy: 0.8469 - val_loss: 0.4360 - val_masked_accuracy: 0.8683 - 172s/epoch - 108ms/step
+Epoch 24/30
+
+Epoch 24: val_loss improved from 0.42898 to 0.41075, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 173s - loss: 0.5028 - masked_accuracy: 0.8486 - val_loss: 0.4108 - val_masked_accuracy: 0.8761 - 173s/epoch - 109ms/step
+Epoch 25/30
+
+Epoch 25: val_loss improved from 0.41075 to 0.39908, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 173s - loss: 0.5005 - masked_accuracy: 0.8495 - val_loss: 0.3991 - val_masked_accuracy: 0.8797 - 173s/epoch - 109ms/step
+Epoch 26/30
+
+Epoch 26: val_loss improved from 0.39908 to 0.38969, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 173s - loss: 0.4783 - masked_accuracy: 0.8559 - val_loss: 0.3897 - val_masked_accuracy: 0.8823 - 173s/epoch - 109ms/step
+Epoch 27/30
+
+Epoch 27: val_loss improved from 0.38969 to 0.38357, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 173s - loss: 0.4691 - masked_accuracy: 0.8585 - val_loss: 0.3836 - val_masked_accuracy: 0.8841 - 173s/epoch - 109ms/step
+Epoch 28/30
+
+Epoch 28: val_loss improved from 0.38357 to 0.38159, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 173s - loss: 0.4680 - masked_accuracy: 0.8584 - val_loss: 0.3816 - val_masked_accuracy: 0.8842 - 173s/epoch - 109ms/step
+Epoch 29/30
+
+Epoch 29: val_loss improved from 0.38159 to 0.36205, saving model to general_transformer_2_weights_checkpoint.h5
+1591/1591 - 173s - loss: 0.4581 - masked_accuracy: 0.8612 - val_loss: 0.3621 - val_masked_accuracy: 0.8901 - 173s/epoch - 109ms/step
+Epoch 30/30
+
+Epoch 30: val_loss did not improve from 0.36205
+1591/1591 - 174s - loss: 0.4625 - masked_accuracy: 0.8598 - val_loss: 0.3721 - val_masked_accuracy: 0.8869 - 174s/epoch - 109ms/step
+CPU times: user 1h 9min 37s, sys: 4min 3s, total: 1h 13min 41s
+Wall time: 1h 27min 36s
+<keras.callbacks.History at 0x783c8c3083d0>
