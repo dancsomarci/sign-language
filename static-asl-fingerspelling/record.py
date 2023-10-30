@@ -36,8 +36,8 @@ def retrieve_coordinates(landmark):
     return [landmark.x, landmark.y, landmark.z]
 
 
-record_category = '*'
-filename = "zsolca_afternoon_natural_light_lenovo.csv"
+record_category = 'u'
+filename = "fehervari_afternoon_desktop.csv"
 
 recorded_frames = []
 
