@@ -14,6 +14,10 @@ You can also see the progression from week to week in the `archived models` fold
 
 The rest of the folders contain the trained models with in `tf-savedmodel` format.
 
+## Note:
+
+The models are missing the binary files. A fix will be deployed shortly!
+
 
 ## Dataset
 
