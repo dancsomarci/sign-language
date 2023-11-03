@@ -3,7 +3,6 @@
 *mp4
 *tfrecord
 *.h5
-*.pb
 *.index
 */.ipynb_checkpoints/*
 */*/.ipynb_checkpoints/*
