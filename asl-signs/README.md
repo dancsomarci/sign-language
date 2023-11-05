@@ -8,5 +8,5 @@ https://www.kaggle.com/c/asl-signs
 
 ## Credits
 
-[Huge thanks to Hoyeul Sohn for sharing details about the architecture of his project.](https://www.kaggle.com/competitions/asl-signs/discussion/406684)
+[Huge thanks to Hoyeul Sohn for sharing details about the architecture of his model.](https://www.kaggle.com/competitions/asl-signs/discussion/406684)
 
