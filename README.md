@@ -2,7 +2,7 @@
 
 The aim of this project is to investigate pose approximation is an appropriate way to translate sign language. For details on the project look at the `documentation`, or in the `python notebooks`.
 
-| <a href="https://github.com/dancsomarci/sign-language/blob/main/documentation/dancso_marcell_2023_tdk.pdf"><img src=".github/paper.png" width="200"/></a> | [*Sign language translation using pose approximation methods*](https://github.com/dancsomarci/sign-language/blob/main/documentation/dancso_marcell_2023_tdk.pdf) <br/> Marcell Dancsó <br/> <br /> :point_left: Journal paper, documenting the research. <br/> :fire: Huge thanks to Dr. Ekler Péter my University Mentour|
+| <a href="https://github.com/dancsomarci/sign-language/blob/main/documentation/dancso_marcell_2023_tdk.pdf"><img src=".github/paper.png" width="300"/></a> | [*Sign language translation using pose approximation methods*](https://github.com/dancsomarci/sign-language/blob/main/documentation/dancso_marcell_2023_tdk.pdf) <br/> Marcell Dancsó <br/> <br /> :point_left: Journal paper, documenting the research. <br/> :fire: Huge thanks to Dr. Ekler Péter my University Mentour|
 | ------------------------------------------------------------ | :----------------------------------------------------------- |
 
 
@@ -18,8 +18,4 @@ The aim of this project is to investigate pose approximation is an appropriate w
 
 ## Example videos from the developed application:
 
-<video src=".github/Continuous signing model.mp4"></video>
-
-<video src=".github/static fs demo.mp4"></video>
-
-<video src=".github/Non continuous model.mp4"></video>
+https://github.com/dancsomarci/sign-language/assets/81509197/20be4f4e-5162-4ae8-85ba-a96ad456525e
