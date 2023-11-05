@@ -2,7 +2,11 @@
 
 The aim of this project is to investigate pose approximation is an appropriate way to translate sign language. For details on the project look at the `documentation`, or in the `python notebooks`.
 
-Folder structure:
+| <a href="https://github.com/dancsomarci/sign-language/blob/main/documentation/dancso_marcell_2023_tdk.pdf"><img src=".github/paper.png" width="200"/></a> | [*Sign language translation using pose approximation methods*](https://github.com/dancsomarci/sign-language/blob/main/documentation/dancso_marcell_2023_tdk.pdf) <br/> Marcell Dancsó <br/> <br /> :point_left: Journal paper, documenting the research. <br/> :fire: Huge thanks to Dr. Ekler Péter my University Mentour|
+| ------------------------------------------------------------ | :----------------------------------------------------------- |
+
+
+## Folder structure:
 
 | Folder       | Content |
 |------------|-----|
@@ -14,11 +18,8 @@ Folder structure:
 
 ## Example videos from the developed application:
 
-### __Note:__
-The videos are currently down, due to an unknown issue. They will be reuploaded on shortly (1-2 workdays)!
+<video src=".github/Continuous signing model.mp4"></video>
 
-https://github.com/dancsomarci/sign-language/assets/81509197/18c0ca37-3d2d-4611-a180-04ae42254ee6
+<video src=".github/static fs demo.mp4"></video>
 
-https://github.com/dancsomarci/sign-language/assets/81509197/41b5388a-e2bf-4ebf-b8db-6b654fe31c88
-
-https://github.com/dancsomarci/sign-language/assets/81509197/ba2f35bc-4759-42c8-a57d-079c062c054e
+<video src=".github/Non continuous model.mp4"></video>

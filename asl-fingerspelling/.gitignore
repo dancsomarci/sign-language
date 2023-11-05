@@ -1,3 +1,13 @@
 kaggle_dataset/*
 .ipynb_checkpoints/*
 *.h5
+test_videos/fingerspelling_animals.mp4
+test_videos/full fingerspelling.mp4
+test_videos/horse.mp4
+test_videos/hyena.mp4
+test_videos/kangaroo.mp4
+test_videos/lion.mp4
+test_videos/monkey.mp4
+test_videos/tiger.mp4
+test_videos/whale.mp4
+test_videos/zebra.mp4
