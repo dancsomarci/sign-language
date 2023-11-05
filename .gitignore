@@ -1,11 +1,2 @@
-*parquet
-*/kaggle_dataset/*
+assets/*.png
 *mp4
-*tfrecord
-*.h5
-*.index
-*/.ipynb_checkpoints/*
-*/*/.ipynb_checkpoints/*
-*/*/variables/*
-*.zip
-*.png

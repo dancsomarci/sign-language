@@ -1,0 +1,3 @@
+kaggle_dataset/*
+.ipynb_checkpoints/*
+*.h5
