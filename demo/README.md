@@ -4,8 +4,6 @@ The demo consists of two parts:
     - Static fingerspelling
     - Sequence to Sequence translation of short video samples
 
-For a more detailed documentation of the project visit: https://github.com/dancsomarci/sign-language
-
 ## How to use
 
 Before using any of the demos, one must follow all the steps below.
@@ -31,23 +29,6 @@ source .venv/bin/activate
 Install the dependencies:
 ```
 pip install -r requirements.txt
-```
-
-After installing all the dependencies, the trained models should be downloaded and placed in the root folder from this link: https://drive.google.com/drive/folders/1Qycd2CrYStvOalYAbq1GzyFVidZaHKv-?usp=sharing
-
-The folder structure should look like this:
-
-```
-root folder/
-├── trained_models/
-|    ├── static_fingerspelling_demo_model/
-|    |   └── ...
-|    └── Transformer_no_pos_embed/
-|        └── ...
-├── test_videos/
-|    └── alligator.mp4
-├── static.py
-└── translate.py
 ```
 
 ## Static fingerspelling demo
