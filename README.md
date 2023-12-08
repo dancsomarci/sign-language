@@ -6,7 +6,7 @@ This project investigates whether pose approximation is an appropriate way to tr
 | ------------------------------------------------------------ | :----------------------------------------------------------- |
 
 
-## Folder structure:
+## 🏗️ Folder structure:
 
 | Folder       | Content |
 |------------|-----|
@@ -19,3 +19,5 @@ This project investigates whether pose approximation is an appropriate way to tr
 ## Example videos from the developed application:
 
 https://github.com/dancsomarci/sign-language/assets/81509197/20be4f4e-5162-4ae8-85ba-a96ad456525e
+
+🔥 Thanks to [DEAFiningASL](https://www.youtube.com/watch?v=sbHJYaZ8UWE&ab_channel=DEAFiningASL) for the fingerspelling videos!
