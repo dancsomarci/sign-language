@@ -2,7 +2,7 @@
 
 This project investigates whether pose approximation is an appropriate way to translate sign language. For details on the project look at the `documentation`, or in the `python notebooks`.
 
-| <a href="https://github.com/dancsomarci/sign-language/blob/main/documentation/dancso_marcell_2023_tdk.pdf"><img src=".github/paper.png" width="300"/></a> | [*Sign language translation using pose approximation methods*](https://github.com/dancsomarci/sign-language/blob/main/documentation/Szakdolgozat.pdf) <br/> Marcell Dancsó <br/> <br /> :point_left: Journal paper, documenting the research. <br/> :fire: Huge thanks to Dr. Ekler Péter my University Mentor|
+| <a href="https://github.com/dancsomarci/sign-language/blob/main/documentation/Szakdolgozat.pdf"><img src=".github/paper.png" width="300"/></a> | [*Sign language translation using pose approximation methods*](https://github.com/dancsomarci/sign-language/blob/main/documentation/Szakdolgozat.pdf) <br/> Marcell Dancsó <br/> <br /> :point_left: Journal paper, documenting the research. <br/> :fire: Huge thanks to Dr. Ekler Péter my University Mentor|
 | ------------------------------------------------------------ | :----------------------------------------------------------- |
 
 
